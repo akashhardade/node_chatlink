@@ -1,8 +1,34 @@
 [
   {
+    "userId": "7b810517-5533-4cbc-a982-08e5898652fe",
     "username": "Akash_Hardade",
     "email": "akashhardade97@gmail.com",
     "mobile": "8850843469",
-    "password": "$2a$10$mP2uWDXm.YsWJtD.yqJUcuK.zIPcGvNOR6r1GES9IjF8RSsRhFMjO"
+    "password": "$2a$10$z.J4jLZ05OFORcp4.82Mn.ZJu.CZWnhBosniisTRllWPojkqo36KG",
+    "rooms": [
+      {
+        "roomId": "5b5c1e24-01b3-4c5e-9f9e-ef0db9cc67b2",
+        "roomName": "Akatsuki",
+        "members": [
+          "Akash_Hardade",
+          "Sanjana_Hardade"
+        ]
+      },
+      {
+        "roomId": "e19a7a3d-4c20-43da-90dd-865639aac21f",
+        "roomName": "Naruto",
+        "members": [
+          "Akash_Hardade"
+        ]
+      }
+    ]
+  },
+  {
+    "userId": "164a8ee9-b07d-49ae-b7d8-f0b91b146122",
+    "username": "Sanjana_Hardade",
+    "email": "sanjanahardade@gmail.com",
+    "mobile": "8779614412",
+    "password": "$2a$10$3vPXbvRAHFXbP4ZBKtdcc.rh0l7xlRk2N3H9thifg/Nd2fVlj78Tu",
+    "rooms": []
   }
 ]

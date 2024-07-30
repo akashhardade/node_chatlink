@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Room</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Chat Room</h1>
+  <div id="login">
+    <input id="email" type="text" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="loginButton">Login</button>
+  </div>
+
+  <div id="chatRooms" style="display: none;">
+    <h2>Chat Rooms</h2>
+    <ul id="roomList"></ul>
+    <input id="newRoomName" type="text" placeholder="New Room Name" />
+    <button id="createRoomButton">Create Room</button>
+  </div>
+
+  <div id="chat" style="display: none;">
+    <h2>Chat</h2>
+    <div id="messages"></div>
+    <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" />
+    <button id="sendButton">Send</button>
+  </div>
+
+  <script>
+    const socket = io();
+
+    document.getElementById('loginButton').addEventListener('click', () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      }).then(response => response.json()).then(data => {
+        if (data.token) {
+          document.getElementById('login').style.display = 'none';
+          document.getElementById('chatRooms').style.display = 'block';
+
+          data.rooms.forEach(room => {
+            const roomElement = document.createElement('li');
+            roomElement.textContent = room.roomName;
+            roomElement.dataset.roomId = room.roomId;
+            roomElement.addEventListener('click', () => joinRoom(data.token, room.roomId, email));
+            document.getElementById('roomList').appendChild(roomElement);
+          });
+
+          document.getElementById('createRoomButton').addEventListener('click', () => {
+            const roomName = document.getElementById('newRoomName').value;
+            fetch('/api/auth/create-room', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: data.token, roomName })
+            }).then(response => response.json()).then(newRoom => {
+              const roomElement = document.createElement('li');
+              roomElement.textContent = newRoom.roomName;
+              roomElement.dataset.roomId = newRoom.roomId;
+              roomElement.addEventListener('click', () => joinRoom(data.token, newRoom.roomId, email));
+              document.getElementById('roomList').appendChild(roomElement);
+            });
+          });
+        } else {
+          alert(data.message);
+        }
+      }).catch(err => {
+        console.error('Error logging in:', err);
+      });
+    });
+
+    function joinRoom(token, roomId, username) {
+      fetch('/api/auth/join-room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, roomId })
+      }).then(response => response.json()).then(data => {
+        if (data.message === 'Joined room successfully') {
+          document.getElementById('chatRooms').style.display = 'none';
+          document.getElementById('chat').style.display = 'block';
+
+          socket.emit('joinRoom', { roomId, username });
+
+          const messageInput = document.getElementById('messageInput');
+          const sendButton = document.getElementById('sendButton');
+          const messages = document.getElementById('messages');
+
+          sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            socket.emit('sendMessage', message, () => {
+              messageInput.value = '';
+            });
+          });
+
+          socket.on('message', ({ user, text }) => {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${user}: ${text}`;
+            messages.appendChild(messageElement);
+          });
+        } else {
+          alert(data.message);
+        }
+      }).catch(err => {
+        console.error('Error joining room:', err);
+      });
+    }
+  </script>
+</body>
+</html>
